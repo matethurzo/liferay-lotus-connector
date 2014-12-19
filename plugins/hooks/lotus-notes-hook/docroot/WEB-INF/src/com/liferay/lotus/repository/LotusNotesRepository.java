@@ -64,8 +64,7 @@ public class LotusNotesRepository
 		String filePath = null;
 
 		try {
-			LotusConnection lotusConnection =
-				getLotusNotesConnection();
+			LotusConnection lotusConnection = getLotusNotesConnection();
 
 			LotusFile lotusFile = null;
 
@@ -274,7 +273,7 @@ public class LotusNotesRepository
 		try {
 			_credentialsProvider = credentialsProvider;
 
-			_host = typeSettingsProperties.getProperty(_HOST);
+			_host = typeSettingsProperties.getProperty(_PARAMETER_HOST);
 
 			_connectionCache = new ConnectionCache<LotusConnection>(
 				LotusConnection.class, getRepositoryId(), this);
@@ -323,13 +322,17 @@ public class LotusNotesRepository
 
 	private static final String _CONFIGURATION_WS = "LOTUS_NOTES_WS";
 
-	private static final String _HOST = "HOST";
+	private static final String _PARAMETER_HOST = "HOST";
+
+	private static final String _PARAMETER_FORM = "FORM";
+
+	private static final String _PARAMETER_CONTENT_FIELD = "CONTENT";
 
 	private static final String[] _SUPPORTED_CONFIGURATIONS =
 		{_CONFIGURATION_WS};
 
 	private static final String[][] _SUPPORTED_PARAMETERS =
-		{{_HOST}};
+		{{_PARAMETER_HOST, _PARAMETER_FORM, _PARAMETER_CONTENT_FIELD}};
 
 	private ConnectionCache<LotusConnection> _connectionCache;
 	private CredentialsProvider _credentialsProvider;
