@@ -1,0 +1,1 @@
+create index IX_5A6C29D0 on CI_ImportEntry (groupId);
