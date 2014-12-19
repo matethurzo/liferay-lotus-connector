@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!DOCTYPE project>
 
-<project name="sharepoint-hook" basedir="." default="deploy">
+<project name="liferay-lotus-connector-hook" basedir="." default="deploy">
 	<property name="import.shared" value="dl-repository-shared" />
 
 	<import file="../build-common-hook.xml" />
