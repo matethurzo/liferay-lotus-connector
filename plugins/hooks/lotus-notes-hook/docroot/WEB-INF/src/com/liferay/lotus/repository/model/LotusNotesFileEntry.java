@@ -15,14 +15,12 @@
 package com.liferay.lotus.repository.model;
 
 import com.liferay.lotus.repository.util.LotusObjectFieldConstants;
+import com.liferay.lotus.repository.util.LotusUtil;
 import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.util.ContentTypes;
-import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.repository.external.ExtRepositoryFileEntry;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -35,25 +33,20 @@ public class LotusNotesFileEntry implements ExtRepositoryFileEntry {
 	}
 
 	@Override
+	public boolean containsPermission(
+		ExtRepositoryPermission extRepositoryPermission) {
+
+		return true;
+	}
+
+	@Override
 	public String getCheckedOutBy() {
 		return null;
 	}
 
 	@Override
-	public String getMimeType() {
-		return ContentTypes.APPLICATION_JSON;
-	}
-
-	@Override
-	public String getTitle() {
-		return getExtRepositoryModelKey();
-	}
-
-	@Override
-	public boolean containsPermission(
-		ExtRepositoryPermission extRepositoryPermission) {
-
-		return true;
+	public Date getCreateDate() {
+		return getModifiedDate();
 	}
 
 	@Override
@@ -66,32 +59,20 @@ public class LotusNotesFileEntry implements ExtRepositoryFileEntry {
 		return StringPool.BLANK;
 	}
 
-	private Date _toDate(String isoDate) {
-		try {
-			DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
-				"yyyy-MM-dd'T'HH:mm:ssZ");
+	@Override
+	public String getExtRepositoryModelKey() {
+		return _jsonObject.getString(LotusObjectFieldConstants.UNID);
+	}
 
-			return dateFormat.parse(isoDate);
-		}
-		catch (ParseException pe) {
-			throw new RuntimeException(pe);
-		}
+	@Override
+	public String getMimeType() {
+		return ContentTypes.APPLICATION_JSON;
 	}
 
 	@Override
 	public Date getModifiedDate() {
-		return _toDate(
+		return LotusUtil.toDate(
 			_jsonObject.getString(LotusObjectFieldConstants.MODIFIED));
-	}
-
-	@Override
-	public Date getCreateDate() {
-		return getModifiedDate();
-	}
-
-	@Override
-	public String getExtRepositoryModelKey() {
-		return _jsonObject.getString(LotusObjectFieldConstants.UNID);
 	}
 
 	@Override
@@ -102,6 +83,11 @@ public class LotusNotesFileEntry implements ExtRepositoryFileEntry {
 	@Override
 	public long getSize() {
 		return 0;
+	}
+
+	@Override
+	public String getTitle() {
+		return getExtRepositoryModelKey();
 	}
 
 	private final JSONObject _jsonObject;

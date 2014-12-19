@@ -14,9 +14,22 @@
 
 package com.liferay.lotus.repository;
 
+import com.liferay.lotus.repository.model.LotusNotesFileEntry;
+import com.liferay.lotus.repository.model.LotusNotesFileVersion;
 import com.liferay.lotus.repository.model.LotusNotesFolder;
 import com.liferay.lotus.repository.placeholder.LotusConnection;
 import com.liferay.lotus.repository.placeholder.LotusException;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.exception.SystemException;
+import com.liferay.portal.kernel.json.JSONArray;
+import com.liferay.portal.kernel.json.JSONException;
+import com.liferay.portal.kernel.json.JSONFactoryUtil;
+import com.liferay.portal.kernel.repository.RepositoryException;
+import com.liferay.portal.kernel.search.Query;
+import com.liferay.portal.kernel.search.SearchContext;
+import com.liferay.portal.kernel.util.StringPool;
+import com.liferay.portal.kernel.util.UnicodeProperties;
+import com.liferay.portal.model.CompanyConstants;
 import com.liferay.repository.external.CredentialsProvider;
 import com.liferay.repository.external.ExtRepository;
 import com.liferay.repository.external.ExtRepositoryAdapter;
@@ -28,11 +41,20 @@ import com.liferay.repository.external.ExtRepositoryObject;
 import com.liferay.repository.external.ExtRepositoryObjectType;
 import com.liferay.repository.external.ExtRepositorySearchResult;
 import com.liferay.repository.external.search.ExtRepositoryQueryMapper;
-import org.omg.CORBA.SystemException;
 
+import java.io.IOException;
 import java.io.InputStream;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpState;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 
 /**
  * @author
@@ -66,6 +88,7 @@ public class LotusNotesRepository
 
 		// connect to lotus notes with stored parameters (from initRepository)
 		// and user:password from credentialsProvider
+
 		throw new UnsupportedOperationException("TODO");
 	}
 
@@ -74,7 +97,9 @@ public class LotusNotesRepository
 			String extRepositoryFileEntryKey)
 		throws SystemException {
 
-		// may return null and the portal takes care of returning the correct version
+		// may return null and the portal takes care of returning the correct
+		// version
+
 		return null;
 	}
 
@@ -83,7 +108,6 @@ public class LotusNotesRepository
 			String extRepositoryFileEntryKey, boolean createMajorVersion,
 			String changeLog)
 		throws SystemException {
-
 	}
 
 	@Override
@@ -110,7 +134,6 @@ public class LotusNotesRepository
 				extRepositoryObjectType,
 			String extRepositoryObjectKey)
 		throws SystemException {
-
 	}
 
 	@Override
@@ -156,7 +179,8 @@ public class LotusNotesRepository
 			ExtRepositoryFileEntry extRepositoryFileEntry)
 		throws SystemException {
 
-		throw new UnsupportedOperationException("TODO");
+		return Collections.<ExtRepositoryFileVersion>singletonList(
+			new LotusNotesFileVersion((LotusNotesFileEntry)extRepositoryFileEntry));
 	}
 
 	@Override
@@ -183,7 +207,48 @@ public class LotusNotesRepository
 			String extRepositoryFolderKey)
 		throws SystemException {
 
-		return Collections.emptyList();
+		try {
+			if (extRepositoryObjectType == ExtRepositoryObjectType.FOLDER) {
+				return Collections.emptyList();
+			}
+
+			HttpClient httpClient = new HttpClient();
+
+			HttpState state = httpClient.getState();
+
+			state.setCredentials(
+				AuthScope.ANY,
+				new UsernamePasswordCredentials("Mate matet_000", "liferay"));
+
+			GetMethod getMethod = new GetMethod(
+				"http://172.16.22.196/log.nsf/api/data/documents");
+
+			getMethod.setDoAuthentication(true);
+
+			httpClient.executeMethod(getMethod);
+
+			String response = getMethod.getResponseBodyAsString();
+
+			JSONArray jsonArray = JSONFactoryUtil.createJSONArray(response);
+
+			List<LotusNotesFileEntry> items =
+				new ArrayList<LotusNotesFileEntry>();
+
+			for (int i = 0; i < jsonArray.length(); i++) {
+				items.add(new LotusNotesFileEntry(jsonArray.getJSONObject(i)));
+			}
+
+			return (List<T>)items;
+		}
+		catch (JSONException e) {
+			throw new SystemException(e);
+		}
+		catch (HttpException e) {
+			throw new SystemException(e);
+		}
+		catch (IOException e) {
+			throw new SystemException(e);
+		}
 	}
 
 	@Override
@@ -193,7 +258,37 @@ public class LotusNotesRepository
 			String extRepositoryFolderKey)
 		throws SystemException {
 
-		return 0;
+		try {
+			HttpClient httpClient = new HttpClient();
+
+			HttpState state = httpClient.getState();
+
+			state.setCredentials(
+				AuthScope.ANY,
+				new UsernamePasswordCredentials("Mate matet_000", "liferay"));
+
+			GetMethod getMethod = new GetMethod(
+				"http://172.16.22.196/log.nsf/api/data/documents");
+
+			getMethod.setDoAuthentication(true);
+
+			httpClient.executeMethod(getMethod);
+
+			String response = getMethod.getResponseBodyAsString();
+
+			JSONArray jsonArray = JSONFactoryUtil.createJSONArray(response);
+
+			return jsonArray.length();
+		}
+		catch (JSONException e) {
+			throw new SystemException(e);
+		}
+		catch (HttpException e) {
+			throw new SystemException(e);
+		}
+		catch (IOException e) {
+			throw new SystemException(e);
+		}
 	}
 
 	@Override
@@ -241,7 +336,6 @@ public class LotusNotesRepository
 		throws SystemException {
 
 		try {
-			_credentialsProvider = credentialsProvider;
 			_host = typeSettingsProperties.getProperty(_PARAMETER_HOST);
 			_database = typeSettingsProperties.getProperty(_DATABASE);
 			_rootFolder = LotusNotesFolder.createRootFolder();
@@ -281,13 +375,13 @@ public class LotusNotesRepository
 
 	private static final String _CONFIGURATION_WS = "LOTUS_NOTES_WS";
 
-	private static final String _PARAMETER_HOST = "HOST";
-
-	private static final String _PARAMETER_FORM = "FORM";
+	private static final String _DATABASE = "DATABASE";
 
 	private static final String _PARAMETER_CONTENT_FIELD = "CONTENT";
 
-	private static final String _DATABASE = "DATABASE";
+	private static final String _PARAMETER_FORM = "FORM";
+
+	private static final String _PARAMETER_HOST = "HOST";
 
 	private static final String[] _SUPPORTED_CONFIGURATIONS =
 		{_CONFIGURATION_WS};

@@ -15,16 +15,13 @@
 package com.liferay.lotus.repository.model;
 
 import com.liferay.lotus.repository.util.LotusObjectFieldConstants;
+import com.liferay.lotus.repository.util.LotusUtil;
 import com.liferay.portal.kernel.json.JSONFactoryUtil;
 import com.liferay.portal.kernel.json.JSONObject;
-import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.repository.external.ExtRepositoryFolder;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author Ivan Zaera
@@ -36,7 +33,8 @@ public class LotusNotesFolder implements ExtRepositoryFolder {
 
 
 		jsonObject.put(
-			LotusObjectFieldConstants.UNID, "7E93D7B2-8D12-4EAB-9F0E-66572B0F0E4F");
+			LotusObjectFieldConstants.UNID,
+			"7E93D7B2-8D12-4EAB-9F0E-66572B0F0E4F");
 		jsonObject.put(
 			LotusObjectFieldConstants.CREATED, new Date());
 		jsonObject.put(
@@ -79,20 +77,8 @@ public class LotusNotesFolder implements ExtRepositoryFolder {
 
 	@Override
 	public Date getModifiedDate() {
-		return _toDate(
+		return LotusUtil.toDate(
 			_jsonObject.getString(LotusObjectFieldConstants.MODIFIED));
-	}
-
-	private Date _toDate(String isoDate) {
-		try {
-			DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
-				"yyyy-MM-dd'T'HH:mm:ssZ");
-
-			return dateFormat.parse(isoDate);
-		}
-		catch (ParseException pe) {
-			throw new RuntimeException(pe);
-		}
 	}
 
 	@Override

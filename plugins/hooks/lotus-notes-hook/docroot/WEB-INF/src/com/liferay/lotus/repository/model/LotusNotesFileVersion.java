@@ -14,7 +14,6 @@
 
 package com.liferay.lotus.repository.model;
 
-import com.liferay.lotus.repository.placeholder.LotusFile;
 import com.liferay.portal.kernel.util.ContentTypes;
 import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portlet.documentlibrary.model.DLFileEntryConstants;
@@ -37,16 +36,6 @@ public class LotusNotesFileVersion implements ExtRepositoryFileVersion {
 	}
 
 	@Override
-	public String getMimeType() {
-		return ContentTypes.APPLICATION_JSON;
-	}
-
-	@Override
-	public String getVersion() {
-		return DLFileEntryConstants.VERSION_DEFAULT;
-	}
-
-	@Override
 	public Date getCreateDate() {
 		return _fileEntry.getCreateDate();
 	}
@@ -57,6 +46,11 @@ public class LotusNotesFileVersion implements ExtRepositoryFileVersion {
 	}
 
 	@Override
+	public String getMimeType() {
+		return ContentTypes.APPLICATION_JSON;
+	}
+
+	@Override
 	public String getOwner() {
 		return _fileEntry.getOwner();
 	}
@@ -64,6 +58,11 @@ public class LotusNotesFileVersion implements ExtRepositoryFileVersion {
 	@Override
 	public long getSize() {
 		return _fileEntry.getSize();
+	}
+
+	@Override
+	public String getVersion() {
+		return DLFileEntryConstants.VERSION_DEFAULT;
 	}
 
 	private final LotusNotesFileEntry _fileEntry;
