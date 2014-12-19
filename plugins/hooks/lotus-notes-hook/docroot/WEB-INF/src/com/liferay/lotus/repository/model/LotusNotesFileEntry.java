@@ -14,10 +14,15 @@
 
 package com.liferay.lotus.repository.model;
 
-import com.liferay.lotus.repository.placeholder.LotusFile;
+import com.liferay.lotus.repository.util.LotusObjectFieldConstants;
+import com.liferay.portal.kernel.json.JSONObject;
+import com.liferay.portal.kernel.util.ContentTypes;
+import com.liferay.portal.kernel.util.DateFormatFactoryUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.repository.external.ExtRepositoryFileEntry;
-import com.liferay.repository.external.ExtRepositoryObject;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -25,10 +30,8 @@ import java.util.Date;
  */
 public class LotusNotesFileEntry implements ExtRepositoryFileEntry {
 
-	private final LotusFile _lotusFile;
-
-	public LotusNotesFileEntry(LotusFile lotusFile) {
-		_lotusFile = lotusFile;
+	public LotusNotesFileEntry(JSONObject jsonObject) {
+		_jsonObject = jsonObject;
 	}
 
 	@Override
@@ -38,51 +41,69 @@ public class LotusNotesFileEntry implements ExtRepositoryFileEntry {
 
 	@Override
 	public String getMimeType() {
-		return null;
+		return ContentTypes.APPLICATION_JSON;
 	}
 
 	@Override
 	public String getTitle() {
-		return null;
+		return getExtRepositoryModelKey();
 	}
 
 	@Override
-	public boolean containsPermission(ExtRepositoryPermission extRepositoryPermission) {
-		return false;
+	public boolean containsPermission(
+		ExtRepositoryPermission extRepositoryPermission) {
+
+		return true;
 	}
 
 	@Override
 	public String getDescription() {
-		return null;
+		return getTitle();
 	}
 
 	@Override
 	public String getExtension() {
-		return null;
+		return StringPool.BLANK;
+	}
+
+	private Date _toDate(String isoDate) {
+		try {
+			DateFormat dateFormat = DateFormatFactoryUtil.getSimpleDateFormat(
+				"yyyy-MM-dd'T'HH:mm:ssZ");
+
+			return dateFormat.parse(isoDate);
+		}
+		catch (ParseException pe) {
+			throw new RuntimeException(pe);
+		}
 	}
 
 	@Override
 	public Date getModifiedDate() {
-		return null;
+		return _toDate(
+			_jsonObject.getString(LotusObjectFieldConstants.MODIFIED));
 	}
 
 	@Override
 	public Date getCreateDate() {
-		return null;
+		return getModifiedDate();
 	}
 
 	@Override
 	public String getExtRepositoryModelKey() {
-		return null;
+		return _jsonObject.getString(LotusObjectFieldConstants.UNID);
 	}
 
 	@Override
 	public String getOwner() {
-		return null;
+		return LotusObjectFieldConstants.DEFAULT_OWNER;
 	}
 
 	@Override
 	public long getSize() {
 		return 0;
 	}
+
+	private final JSONObject _jsonObject;
+
 }

@@ -14,19 +14,9 @@
 
 package com.liferay.lotus.repository;
 
-import com.liferay.lotus.repository.model.LotusNotesFileEntry;
+import com.liferay.lotus.repository.model.LotusNotesFolder;
 import com.liferay.lotus.repository.placeholder.LotusConnection;
 import com.liferay.lotus.repository.placeholder.LotusException;
-import com.liferay.lotus.repository.placeholder.LotusFile;
-import com.liferay.lotus.repository.placeholder.LotusFolder;
-import com.liferay.portal.kernel.exception.PortalException;
-import com.liferay.portal.kernel.exception.SystemException;
-import com.liferay.portal.kernel.repository.RepositoryException;
-import com.liferay.portal.kernel.search.Query;
-import com.liferay.portal.kernel.search.SearchContext;
-import com.liferay.portal.kernel.util.StringPool;
-import com.liferay.portal.kernel.util.UnicodeProperties;
-import com.liferay.portal.model.CompanyConstants;
 import com.liferay.repository.external.CredentialsProvider;
 import com.liferay.repository.external.ExtRepository;
 import com.liferay.repository.external.ExtRepositoryAdapter;
@@ -37,19 +27,18 @@ import com.liferay.repository.external.ExtRepositoryFolder;
 import com.liferay.repository.external.ExtRepositoryObject;
 import com.liferay.repository.external.ExtRepositoryObjectType;
 import com.liferay.repository.external.ExtRepositorySearchResult;
-import com.liferay.repository.external.cache.ConnectionBuilder;
-import com.liferay.repository.external.cache.ConnectionCache;
 import com.liferay.repository.external.search.ExtRepositoryQueryMapper;
+import org.omg.CORBA.SystemException;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * @author
  */
 public class LotusNotesRepository
-	extends ExtRepositoryAdapter
-	implements ConnectionBuilder<LotusConnection>, ExtRepository {
+	extends ExtRepositoryAdapter implements ExtRepository {
 
 	public LotusNotesRepository() {
 		super(null);
@@ -61,20 +50,7 @@ public class LotusNotesRepository
 			String description, String changeLog, InputStream inputStream)
 		throws PortalException, SystemException {
 
-		String filePath = null;
-
-		try {
-			LotusConnection lotusConnection = getLotusNotesConnection();
-
-			LotusFile lotusFile = null;
-
-			// do whatever
-
-			return new LotusNotesFileEntry(lotusFile);
-		}
-		catch (LotusException lne) {
-			throw new SystemException(lne);
-		}
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -207,7 +183,7 @@ public class LotusNotesRepository
 			String extRepositoryFolderKey)
 		throws SystemException {
 
-		throw new UnsupportedOperationException("TODO");
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -217,7 +193,7 @@ public class LotusNotesRepository
 			String extRepositoryFolderKey)
 		throws SystemException {
 
-		throw new UnsupportedOperationException("TODO");
+		return 0;
 	}
 
 	@Override
@@ -237,13 +213,7 @@ public class LotusNotesRepository
 
 	@Override
 	public String getRootFolderKey() {
-		return _rootFolderKey;
-	}
-
-	public LotusConnection getLotusNotesConnection()
-		throws RepositoryException {
-
-		return _connectionCache.getConnection();
+		return _rootFolder.getExtRepositoryModelKey();
 	}
 
 	@Override
@@ -272,20 +242,9 @@ public class LotusNotesRepository
 
 		try {
 			_credentialsProvider = credentialsProvider;
-
 			_host = typeSettingsProperties.getProperty(_PARAMETER_HOST);
-
-			_connectionCache = new ConnectionCache<LotusConnection>(
-				LotusConnection.class, getRepositoryId(), this);
-
-			LotusConnection lotusConnection =
-				getLotusNotesConnection();
-
-			LotusFolder rootFolder = null;
-
-			// get root folder
-
-			_rootFolderKey = rootFolder.getId();
+			_database = typeSettingsProperties.getProperty(_DATABASE);
+			_rootFolder = LotusNotesFolder.createRootFolder();
 		}
 		catch (LotusException lne) {
 			throw new SystemException(lne);
@@ -328,15 +287,16 @@ public class LotusNotesRepository
 
 	private static final String _PARAMETER_CONTENT_FIELD = "CONTENT";
 
+	private static final String _DATABASE = "DATABASE";
+
 	private static final String[] _SUPPORTED_CONFIGURATIONS =
 		{_CONFIGURATION_WS};
 
 	private static final String[][] _SUPPORTED_PARAMETERS =
 		{{_PARAMETER_HOST, _PARAMETER_FORM, _PARAMETER_CONTENT_FIELD}};
 
-	private ConnectionCache<LotusConnection> _connectionCache;
-	private CredentialsProvider _credentialsProvider;
+	private String _database;
 	private String _host;
-	private String _rootFolderKey;
+	private LotusNotesFolder _rootFolder;
 
 }
