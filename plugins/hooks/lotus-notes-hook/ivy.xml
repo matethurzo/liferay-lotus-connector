@@ -11,6 +11,6 @@
 	</info>
 
 	<dependencies defaultconf="default">
-		<dependency name="lucene-core" org="org.apache.lucene" rev="3.5.0" />
+		<dependency name="resteasy-client" org="org.jboss.resteasy" rev="3.0.10.Final" />
 	</dependencies>
 </ivy-module>
